@@ -1,104 +1,89 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import axios from "axios";
 
 function HelpForm() {
 
-    const [tasks, setTasks] = useState([]);
-    const [name, setName] = useState("");
-    const [location, setLocation] = useState("");
-    const [emergency, setEmergency] = useState("");
-    const [error, setError] = useState("");
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [emergency, setEmergency] = useState("");
 
-    useEffect(() => {
-        console.log("Task List Updated", tasks);
-    }, [tasks]);
+  const handleSubmit = async (e) => {
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        if (name === "" || location === "" || emergency === "") {
-            setError("All fields are required");
-            return;
+    if (!name || !location || !emergency) {
+
+      alert("All fields required");
+
+      return;
+    }
+
+    try {
+
+      await axios.post(
+        "http://localhost:5000/api/add-request",
+        {
+          name,
+          location,
+          emergency
         }
+      );
 
-        const newTask = {
-            id: Date.now(),
-            name,
-            location,
-            emergency
-        };
+      alert("Request Added");
 
-        setTasks([...tasks, newTask]);
+      setName("");
+      setLocation("");
+      setEmergency("");
 
-        setName("");
-        setLocation("");
-        setEmergency("");
-        setError("");
-    };
+    } catch (error) {
 
-    const deleteTask = (id) => {
-        const updatedTasks = tasks.filter((task) => task.id !== id);
-        setTasks(updatedTasks);
-    };
+      console.log(error);
 
-    return (
-        <section className="form-section">
+    }
+  };
 
-            <h2>Request Help</h2>
+  return (
 
-            <form onSubmit={handleSubmit}>
+    <section className="form-section">
 
-                <input
-                    type="text"
-                    placeholder="Enter Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+      <h2>Request Help</h2>
 
-                <input
-                    type="text"
-                    placeholder="Location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                />
+      <form onSubmit={handleSubmit}>
 
-                <textarea
-                    placeholder="Describe Emergency"
-                    value={emergency}
-                    onChange={(e) => setEmergency(e.target.value)}
-                ></textarea>
+        <input
+          type="text"
+          placeholder="Enter Name"
+          value={name}
+          onChange={(e) =>
+            setName(e.target.value)
+          }
+        />
 
-                {error && <p className="error">{error}</p>}
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) =>
+            setLocation(e.target.value)
+          }
+        />
 
-                <button type="submit">Add Request</button>
+        <textarea
+          placeholder="Describe Emergency"
+          value={emergency}
+          onChange={(e) =>
+            setEmergency(e.target.value)
+          }
+        ></textarea>
 
-            </form>
+        <button type="submit">
+          Submit
+        </button>
 
-            <div className="task-container">
+      </form>
 
-                {tasks.map((task) => (
-                    <div className="task-card" key={task.id}>
-
-                        <h3>{task.name}</h3>
-
-                        <p>
-                            <strong>Location:</strong> {task.location}
-                        </p>
-
-                        <p>
-                            <strong>Emergency:</strong> {task.emergency}
-                        </p>
-
-                        <button onClick={() => deleteTask(task.id)}>
-                            Delete
-                        </button>
-
-                    </div>
-                ))}
-
-            </div>
-
-        </section>
-    );
+    </section>
+  );
 }
 
 export default HelpForm;
